@@ -48,7 +48,7 @@ pub fn setup_main_menu(mut commands: Commands) {
                     ..default()
                 })
                 .with_children(|parent| {
-                    // 标题
+                    // title
                     parent.spawn(
                         TextBundle::from_section(
                             "Tetris Main Menu",
@@ -64,7 +64,7 @@ pub fn setup_main_menu(mut commands: Commands) {
                         }),
                     );
 
-                    // 开始按钮
+                    // start button
                     parent
                         .spawn((
                             ButtonBundle {
@@ -92,7 +92,7 @@ pub fn setup_main_menu(mut commands: Commands) {
                             ));
                         });
 
-                    // 退出按钮
+                    // exit button
                     parent
                         .spawn((
                             ButtonBundle {
@@ -150,7 +150,7 @@ pub fn setup_game_over_menu(mut commands: Commands) {
                     ..default()
                 })
                 .with_children(|parent| {
-                    // 标题
+                    // title
                     parent.spawn(
                         TextBundle::from_section(
                             "Game Over",
@@ -166,7 +166,7 @@ pub fn setup_game_over_menu(mut commands: Commands) {
                         }),
                     );
 
-                    // 返回主菜单按钮
+                    // Return to main menu button
                     parent
                         .spawn((
                             ButtonBundle {
@@ -194,7 +194,7 @@ pub fn setup_game_over_menu(mut commands: Commands) {
                             ));
                         });
 
-                    // 重新开始按钮
+                    // restart button
                     parent
                         .spawn((
                             ButtonBundle {
@@ -252,7 +252,7 @@ pub fn setup_game_paused_menu(mut commands: Commands) {
                     ..default()
                 })
                 .with_children(|parent| {
-                    // 标题
+                    // title
                     parent.spawn(
                         TextBundle::from_section(
                             "Game Paused",
@@ -324,7 +324,7 @@ pub fn setup_game_paused_menu(mut commands: Commands) {
                             ));
                         });
 
-                    // 恢复游戏按钮
+                    // Resume game button
                     parent
                         .spawn((
                             ButtonBundle {
@@ -402,7 +402,8 @@ pub fn pause_game(
     mut change_game_state: ResMut<NextState<GameState>>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
-    // 修改为可以再次按下ESC恢复游戏，使用just_pressed防止循环触发
+    // Modified so that you can press ESC again to resume the game，
+    // Use just_pressed to prevent loop triggering
     if keyboard_input.just_pressed(KeyCode::Escape) {
         if let GameState::GamePlaying = game_state.get() {
             change_game_state.set(GameState::GamePaused);
