@@ -357,12 +357,12 @@ pub fn whether_colliding(
     for (_, block, _) in piece_query {
         for board_block in board_query {
             if board_block.y == block.y && block.x > 0 && board_block.x == block.x - 1 {
-                // 防止0-1溢出
-                // 左侧碰撞
+                // Prevent 0-1 overflow
+                // left side collision
                 return true;
             }
             if board_block.y == block.y && board_block.x == block.x + 1 {
-                // 右侧碰撞
+                // right side collision
                 return true;
             }
             if board_block.x == block.x && block.y > 0 && board_block.y == block.y - 1 {
