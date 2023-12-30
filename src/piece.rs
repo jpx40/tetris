@@ -67,7 +67,7 @@ fn shift_block(mut block: Block, delta_x: Option<i32>, delta_y: Option<i32>) -> 
     block
 }
 
-// 四格骨牌
+// four dominoes
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Ord, PartialOrd)]
 pub enum PieceType {
     // ####
@@ -128,7 +128,7 @@ impl PieceConfig {
     }
 }
 
-// 可移动方向
+// Movable direction
 #[derive(Component)]
 pub struct Movable {
     pub can_down: bool,
@@ -136,15 +136,15 @@ pub struct Movable {
     pub can_right: bool,
 }
 
-// 自动向下移动四格骨牌计时器
+// Automatically move down the tetradomino timer
 #[derive(Debug, Resource)]
 pub struct AutoMovePieceDownTimer(pub Timer);
 
-// 待生成的骨牌队列
+// The queue of dominoes to be generated
 #[derive(Debug, Resource)]
 pub struct PieceQueue(pub VecDeque<PieceConfig>);
 
-// 控制手动移动频率
+// Control manual movement frequency
 #[derive(Debug, Resource)]
 pub struct ManuallyMoveTimer(pub Timer);
 
@@ -154,7 +154,7 @@ pub fn setup_piece_queue(mut commands: Commands) {
     commands.insert_resource(piece_queue);
 }
 
-// 自动和手动移动四格骨牌
+// Automatic and manual movement of tetrominoes
 pub fn move_piece(
     mut commands: Commands,
     game_audios: Res<GameAudios>,
@@ -168,16 +168,16 @@ pub fn move_piece(
     auto_move_timer.0.tick(time.delta());
     let mut reset_manually_move_timer = false;
     for (mut block, mut transform, movable) in &mut query {
-        // 防止一帧中向下移动两行
+        // Prevent moving down two lines in one frame
         let mut already_down = false;
-        // 自动下移
+        // Automatically move down
         if auto_move_timer.0.just_finished() && movable.can_down {
             block.y -= 1;
 
             spawn_drop_audio(&mut commands, &game_audios);
             already_down = true;
         }
-        // 手动移动
+        // Manual move
         if manually_move_timer.0.finished() {
             if keyboard_input.pressed(KeyCode::Left) && movable.can_left {
                 block.x -= 1;
@@ -207,7 +207,7 @@ fn spawn_drop_audio(commands: &mut Commands, game_audios: &Res<GameAudios>) {
     });
 }
 
-// 检查碰撞
+// Check for collisions
 pub fn check_collision(
     mut piece_query: Query<(&mut Block, &mut Movable), With<PieceType>>,
     board_query: Query<&Block, Without<PieceType>>,
@@ -216,42 +216,42 @@ pub fn check_collision(
     let mut can_left = true;
     let mut can_right = true;
 
-    // 检查是否碰撞边界
+    // Check if bounds are hit
     for (block, _) in &mut piece_query {
         if block.x == 0 {
-            // 碰撞左边界
+            // Collision left border
             can_left = false;
         }
         if block.x == 9 {
-            // 碰撞右边界
+            // Collision with right boundary
             can_right = false;
         }
         if block.y == 0 {
-            // 碰撞下边界
+            // collision lower boundary
             can_down = false;
         }
     }
 
-    // 检查是否碰撞面板方块
+    // Check if it collides with the panel block
     for (block, _) in &piece_query {
         for board_block in &board_query {
             if board_block.y == block.y && block.x > 0 && board_block.x == block.x - 1 {
-                // 防止0-1溢出
-                // 左侧碰撞
+                // Prevent 0-1 overflow
+                // left side collision
                 can_left = false;
             }
             if board_block.y == block.y && board_block.x == block.x + 1 {
-                // 右侧碰撞
+                // right side collision
                 can_right = false;
             }
             if board_block.x == block.x && block.y > 0 && board_block.y == block.y - 1 {
-                // 下侧碰撞
+                // underside collision
                 can_down = false;
             }
         }
     }
 
-    // 更新Movable
+    // Update Movable
     for (_, mut movable) in &mut piece_query {
         movable.can_left = can_left;
         movable.can_right = can_right;
@@ -276,10 +276,11 @@ pub fn rotate_piece(
 
         let original_blocks: Vec<Block> =
             q_piece.iter().map(|(_, block, _)| block.clone()).collect();
-        // 通过矩阵变化实现旋转，可以理解为沿y=x对称后沿y=0对称，然后平移
+        // Update Movable to implement rotation through matrix changes，
+        // then pan (panic)
         for (_, mut block, mut transform) in &mut q_piece {
             *block = match piece_type {
-                // 微调平移量，使其更自然
+                // Fine-tune the amount of panning to make it more natural
                 PieceType::O | PieceType::L | PieceType::J => shift_block(
                     [block.y, -block.x].into(),
                     Some(sum_x / 4 - sum_y / 4),
@@ -294,7 +295,7 @@ pub fn rotate_piece(
             transform.translation = block.translation();
         }
 
-        // 当出现碰撞时，尝试左右平移最多2格（也可采取旋转后一旦出现碰撞则恢复原样）
+        // When a collision occurs, try to translate left and right up to 2 blocks (you can also rotate and restore to the original position once a collision occurs)
         if whether_colliding(&q_piece, &q_board) {
             for (_, mut block, mut transform) in &mut q_piece {
                 *block = shift_block(block.clone(), Some(-1), None);
@@ -319,7 +320,7 @@ pub fn rotate_piece(
                 transform.translation = block.translation();
             }
         }
-        // 恢复旋转前样子
+        // Restore the appearance before rotation
         if whether_colliding(&q_piece, &q_board) {
             let mut index = 0;
             for (_, mut block, mut transform) in &mut q_piece {
@@ -331,28 +332,28 @@ pub fn rotate_piece(
     }
 }
 
-// 检测旋转过程中是否发送碰撞
+// Detect if collision is sent during rotation
 pub fn whether_colliding(
     piece_query: &Query<(&mut PieceType, &mut Block, &mut Transform)>,
     board_query: &Query<&Block, Without<PieceType>>,
 ) -> bool {
-    // 检查是否碰撞边界
+    // Check if bounds are hit
     for (_, block, _) in piece_query {
         if block.x < 0 {
-            // 碰撞左边界
+            // Collision left border
             return true;
         }
         if block.x > 9 {
-            // 碰撞右边界
+            // Collision with right boundary
             return true;
         }
         if block.y < 0 {
-            // 碰撞下边界
+            // collision lower boundary
             return true;
         }
     }
 
-    // 检查是否碰撞面板方块
+    // Check if it collides with the panel block
     for (_, block, _) in piece_query {
         for board_block in board_query {
             if board_block.y == block.y && block.x > 0 && board_block.x == block.x - 1 {
@@ -365,7 +366,7 @@ pub fn whether_colliding(
                 return true;
             }
             if board_block.x == block.x && block.y > 0 && board_block.y == block.y - 1 {
-                // 下侧碰撞
+                // underside collision
                 return true;
             }
         }
@@ -383,7 +384,7 @@ pub fn control_piece_visibility(mut q_piece: Query<(&mut Visibility, &Block), Wi
     }
 }
 
-// 自动生成新的四格骨牌
+// Automatically generate new tetrominoes
 pub fn auto_generate_new_piece(
     mut commands: Commands,
     query: Query<&PieceType>,
@@ -394,7 +395,7 @@ pub fn auto_generate_new_piece(
     }
     if query.is_empty() {
         let piece_config = piece_queue.0.pop_front().unwrap();
-        // 生成新的四格骨牌
+        // Generate new tetrominoes
         let color = piece_config.color;
         let visibility = Visibility::Hidden;
         let piece_type = piece_config.piece_type.clone();
@@ -413,7 +414,7 @@ pub fn auto_generate_new_piece(
     }
 }
 
-// bag7算法实现随机：每次填充7个随机排序的骨牌
+// The bag7 algorithm implements randomization: filling 7 randomly ordered dominoes each time
 pub fn random_7_pieces() -> Vec<PieceConfig> {
     let mut rng = rand::thread_rng();
     let mut piece_type_set = BTreeSet::new();
