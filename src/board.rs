@@ -7,16 +7,16 @@ use crate::common::*;
 use crate::piece::*;
 use crate::stats::*;
 
-// game board宽高
+// game board Width Height
 pub const COL_COUNT: u8 = 10;
 pub const ROW_COUNT: u8 = 20;
-// 正方形方块边长
+// Side length of square block
 pub const BLOCK_LENGTH: f32 = 30.0;
-// TODO 贴纸圆角
-// 正方形方块贴纸边长
+// TODO sticker rounded corners
+// Square square sticker side length
 pub const BLOCK_STICKER_LENGTH: f32 = 28.0;
 
-// game board 边界厚度
+// game board Boundary thickness
 pub const BORDER_THICKNESS: f32 = 10.0;
 pub const BORDER_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 
@@ -29,9 +29,9 @@ pub struct Block {
 
 impl Block {
     pub fn translation(&self) -> Vec3 {
-        // 方块xy原点为左下角
-        // 方块x范围0-9，方块y范围0-19
-        // 10*20个方块
+        // The xy origin of the box is the lower left corner
+        // Block x ranges from 0-9, block y ranges from 0-19
+        // 10*20 blocks
         Vec3 {
             x: (self.x as f32 - (COL_COUNT as f32 / 2.0) + 0.5) * BLOCK_LENGTH,
             y: (self.y as f32 - (ROW_COUNT as f32 / 2.0) + 0.5) * BLOCK_LENGTH,
@@ -50,8 +50,8 @@ impl From<[i32; 2]> for Block {
 pub struct RemovePieceComponentTimer(pub Timer);
 
 pub fn setup_game_board(mut commands: Commands) {
-    // 三维坐标原点在board中央
-    // 左侧边界
+    // The origin of the three-dimensional coordinates is at the center of the board
+    // left border
     let half_col_count = COL_COUNT as f32 / 2.0;
     let half_raw_count = ROW_COUNT as f32 / 2.0;
     commands.spawn(SpriteBundle {
@@ -73,7 +73,7 @@ pub fn setup_game_board(mut commands: Commands) {
         },
         ..default()
     });
-    // 右侧边界
+    // right border
     commands.spawn(SpriteBundle {
         transform: Transform {
             translation: Vec3 {
@@ -93,7 +93,7 @@ pub fn setup_game_board(mut commands: Commands) {
         },
         ..default()
     });
-    // 上侧边界
+    // upper border
     commands.spawn(SpriteBundle {
         transform: Transform {
             translation: Vec3 {
@@ -113,7 +113,7 @@ pub fn setup_game_board(mut commands: Commands) {
         },
         ..default()
     });
-    // 下侧边界
+    // lower border
     commands.spawn(SpriteBundle {
         transform: Transform {
             translation: Vec3 {
@@ -135,7 +135,7 @@ pub fn setup_game_board(mut commands: Commands) {
     });
 }
 
-// 当piece移到底部后，移除piece组件
+// When the piece moves to the bottom, remove the piece component
 pub fn remove_piece_component(
     mut commands: Commands,
     q_piece_blocks: Query<(Entity, &Movable), With<PieceType>>,
@@ -147,15 +147,15 @@ pub fn remove_piece_component(
         if !q_piece_blocks.iter().last().unwrap().1.can_down {
             timer.0.tick(time.delta());
         } else {
-            // 无法下移时，通过左右移动获得重新下移能力
+            // When unable to move down, gain the ability to move down again by moving left and right.
             timer.0.reset();
         }
     }
     let mut reset_timer = false;
     for (entity, movable) in &q_piece_blocks {
-        // 到达底部后，仍可短时间内左右移动
+        // After reaching the bottom, you can still move left and right in a short time
         if !movable.can_down {
-            // 当到达底部后，按向下键时，跳过timer直接开始新一个piece
+            // When you reach the bottom, press the down key to skip the timer and start a new piece directly.
             if timer.0.just_finished() || keyboard_input.pressed(KeyCode::Down) {
                 commands.entity(entity).remove::<PieceType>();
                 reset_timer = true;
@@ -167,7 +167,7 @@ pub fn remove_piece_component(
     }
 }
 
-// 检查是否有成功的行
+// Check if there is a successful row
 pub fn check_full_line(
     mut commands: Commands,
     game_audios: Res<GameAudios>,
@@ -199,9 +199,9 @@ pub fn check_full_line(
             ..default()
         });
     }
-    // 行数增加
+    // The number of rows increases
     lines.0 += full_lines.len() as u32;
-    // 分数增加
+    // Score increases
     score.0 += match full_lines.len() {
         0 => 0,
         1 => 100,
@@ -211,7 +211,7 @@ pub fn check_full_line(
         _ => 1000,
     };
 
-    // 消除行
+    // Eliminate rows
     let mut despawn_entities = Vec::new();
     for line_no in full_lines.iter() {
         let line_no = **line_no;
@@ -222,7 +222,7 @@ pub fn check_full_line(
             }
         }
     }
-    // 消除行的上面block整体向下移
+    // Eliminate the block above the row and move it down as a whole
     full_lines.sort();
     full_lines.reverse();
     for line_no in full_lines.iter() {
@@ -236,7 +236,7 @@ pub fn check_full_line(
     }
 }
 
-// 检查是否游戏结束
+// Eliminate the block above the row and move it down as a whole
 pub fn check_game_over(
     mut commands: Commands,
     game_audios: Res<GameAudios>,
