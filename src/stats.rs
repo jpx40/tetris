@@ -7,23 +7,23 @@ use crate::{
     piece_shape, shift_piece,
 };
 
-// 计分板长宽
+// Scoreboard length and width
 const STATS_BOARD_LENGTH: f32 = 220.0;
 const STATS_BOARD_WIDTH: f32 = 50.0;
 
-// 分数
+// Fraction
 #[derive(Resource)]
 pub struct Score(pub u32);
 #[derive(Component)]
 pub struct Scoreboard;
 
-// 消除行数
+// Eliminate rows
 #[derive(Resource)]
 pub struct Lines(pub u32);
 #[derive(Component)]
 pub struct Linesboard;
 
-// 展示下一个骨牌
+// show next domino
 #[derive(Debug, Resource)]
 pub struct NextPieceType(pub Option<PieceType>);
 
@@ -34,15 +34,15 @@ pub fn setup_stats_boards(
     mut commands: Commands,
     windows: Query<&Window>,
 ) {
-    // 通过窗口大小和棋盘大小计算stats位置
+    // Calculate stats position by window size and board size
     let window = windows.single();
-    // gameboard左上角在窗口上的位置
+    // The position of the upper left corner of the gameboard on the window
     let gameboard_left_corner_pos = (
         window.width() / 2.0 - 5.0 * BLOCK_LENGTH,
         window.height() / 2.0 - 10.0 * BLOCK_LENGTH,
     );
     info!("gameboard_left_corner_pos: {:?}", gameboard_left_corner_pos);
-    // 分数
+    // Fraction
     commands
         .spawn(
             TextBundle::from_sections([
@@ -72,7 +72,7 @@ pub fn setup_stats_boards(
         )
         .insert(Scoreboard);
 
-    // 行数
+    // Rows
     commands
         .spawn(
             TextBundle::from_sections([
@@ -131,7 +131,7 @@ pub fn update_next_piece_board(
         || piece_queue.0.front().unwrap().piece_type != next_piece_type.0.unwrap()
     {
         next_piece_type.0 = Some(piece_queue.0.front().unwrap().piece_type);
-        // 销毁原board
+        // Destroy the original board 
         for entity in &query {
             commands.entity(entity).despawn();
         }
