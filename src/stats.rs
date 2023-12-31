@@ -59,7 +59,7 @@ pub fn setup_stats_boards(mut commands: Commands, windows: Query<&Window>) {
                         ..default()
                     },
                 ),
-            ]) // TODO: Need to fix position issue
+            ]) // TODO: Need to fix position   https://docs.rs/bevy/latest/bevy/window/struct.WindowResolution.html
             .with_style(Style {
                 position_type: PositionType::Absolute,
                 top: Val::Px(gameboard_left_corner_pos.1),
