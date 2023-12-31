@@ -30,10 +30,7 @@ pub struct NextPieceType(pub Option<PieceType>);
 #[derive(Debug, Component)]
 pub struct NextPieceBoard;
 
-pub fn setup_stats_boards(
-    mut commands: Commands,
-    windows: Query<&Window>,
-) {
+pub fn setup_stats_boards(mut commands: Commands, windows: Query<&Window>) {
     // Calculate stats position by window size and board size
     let window = windows.single();
     // The position of the upper left corner of the gameboard on the window
@@ -62,7 +59,7 @@ pub fn setup_stats_boards(
                         ..default()
                     },
                 ),
-            ])
+            ]) // TODO: Need to fix position issue
             .with_style(Style {
                 position_type: PositionType::Absolute,
                 top: Val::Px(gameboard_left_corner_pos.1),
@@ -92,7 +89,7 @@ pub fn setup_stats_boards(
                         ..default()
                     },
                 ),
-            ])
+            ]) // TODO: Need to fix position issue
             .with_style(Style {
                 position_type: PositionType::Absolute,
                 top: Val::Px(gameboard_left_corner_pos.1 + STATS_BOARD_WIDTH),
@@ -131,7 +128,7 @@ pub fn update_next_piece_board(
         || piece_queue.0.front().unwrap().piece_type != next_piece_type.0.unwrap()
     {
         next_piece_type.0 = Some(piece_queue.0.front().unwrap().piece_type);
-        // Destroy the original board 
+        // Destroy the original board
         for entity in &query {
             commands.entity(entity).despawn();
         }
